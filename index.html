@@ -82,16 +82,30 @@
     let tileSymbols = [];
     let specialSymbols = [];
 
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 5000);
+    }
+
     async function loadSVG(url) {
       const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`Failed to load: ${url}`);
       const svgText = await resp.text();
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         const svg = document.createElement('svg');
         svg.innerHTML = svgText;
         svg.setAttribute('style', 'display:none');
         document.body.appendChild(svg);
+        const timeout = setTimeout(() => {
+          document.body.removeChild(svg);
+          reject(new Error(`Timeout importing: ${url}`));
+        }, 10000);
         paper.project.importSVG(svg, {
           onLoad: function(item) {
+            clearTimeout(timeout);
+            document.body.removeChild(svg);
             item.remove();
             resolve(item);
           }
@@ -100,10 +114,15 @@
     }
 
     async function loadAllSVGs() {
-      const tilePromises = TILES.map(url => loadSVG(url));
-      const specialPromises = SPECIALS.map(s => loadSVG(s.file));
-      const tiles = await Promise.all(tilePromises);
-      const specials = await Promise.all(specialPromises);
+      const tilePromises = TILES.map(url =>
+        loadSVG(url).catch(() => null)
+      );
+      const specialPromises = SPECIALS.map(s =>
+        loadSVG(s.file).catch(() => null)
+      );
+      const tiles = (await Promise.all(tilePromises)).filter(Boolean);
+      const specials = (await Promise.all(specialPromises)).filter(Boolean);
+      if (tiles.length === 0) throw new Error('Nessun tassello caricato. Verifica i file SVG.');
       tileSymbols = tiles.map(t => new paper.Symbol(t));
       specialSymbols = specials.map((s, i) => ({
         symbol: new paper.Symbol(s),
@@ -115,8 +134,11 @@
     paper.setup('myCanvas');
 
     async function init() {
-      await loadAllSVGs();
-      console.log('Loaded', tileSymbols.length, 'tile symbols');
+      try {
+        await loadAllSVGs();
+      } catch (e) {
+        showError(e.message);
+      }
     }
     init();
   </script>
