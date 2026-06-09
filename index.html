@@ -361,8 +361,11 @@
 
           let free = true;
           for (let dr = 0; dr < e.h && free; dr++)
-            for (let dc = 0; dc < e.w && free; dc++)
-              if (grid[nr + dr][nc + dc] !== null) free = false;
+            for (let dc = 0; dc < e.w && free; dc++) {
+              const occ = grid[nr + dr][nc + dc];
+              if (occ !== null && !(occ.type === e.type && occ.index === e.index))
+                free = false;
+            }
 
           if (free) {
             for (let dr = 0; dr < e.h; dr++)
