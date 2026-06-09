@@ -93,6 +93,14 @@
 
     let tileSymbols = [];
     let specialSymbols = [];
+    let swapTimer = null;
+    let isAnimating = false;
+    let animatingTiles = [];
+    let prevSpecials = [];
+    let prevTiles = [];
+    let currentSpecials = [];
+    let currentTiles = [];
+    let currentCs = 0;
 
     function showError(msg) {
       const el = document.getElementById('errorMsg');
