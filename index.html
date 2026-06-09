@@ -442,13 +442,17 @@
 
     window.addEventListener('resize', () => {
       resizeCanvas();
-      if (gridCols > 0) init();
+      if (gridCols > 0 && !isAnimating) init();
     });
 
     resizeCanvas();
     init();
 
     document.getElementById('generateBtn').addEventListener('click', () => {
+      if (swapTimer) clearInterval(swapTimer);
+      swapTimer = null;
+      isAnimating = false;
+      animatingTiles = [];
       init();
     });
 
