@@ -97,24 +97,11 @@
       const resp = await fetch(url);
       if (!resp.ok) throw new Error(`Failed to load: ${url}`);
       const svgText = await resp.text();
-      return new Promise((resolve, reject) => {
-        const svg = document.createElement('svg');
-        svg.innerHTML = svgText;
-        svg.setAttribute('style', 'display:none');
-        document.body.appendChild(svg);
-        const timeout = setTimeout(() => {
-          document.body.removeChild(svg);
-          reject(new Error(`Timeout importing: ${url}`));
-        }, 10000);
-        paper.project.importSVG(svg, {
-          onLoad: function(item) {
-            clearTimeout(timeout);
-            document.body.removeChild(svg);
-            item.remove();
-            resolve(item);
-          }
-        });
-      });
+      const svg = document.createElement('svg');
+      svg.innerHTML = svgText;
+      const item = paper.project.importSVG(svg);
+      if (!item) throw new Error(`Failed to parse SVG: ${url}`);
+      return item;
     }
 
     async function loadAllSVGs() {
