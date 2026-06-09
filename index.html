@@ -250,6 +250,30 @@
 
     paper.setup('myCanvas');
 
+    paper.view.onFrame = function(event) {
+      if (!isAnimating || animatingTiles.length === 0) return;
+      const duration = 1.5;
+      const t = Math.min(event.time / duration, 1);
+
+      for (const a of animatingTiles) {
+        a.item.matrix = a.baseMatrix.clone();
+        const pt = a.oldPos.clone().add(a.newPos.subtract(a.oldPos).multiply(t));
+        a.item.position = pt;
+
+        const smear = 1 + Math.sin(t * Math.PI) * 2.5;
+        const center = a.item.bounds.center;
+        a.item.rotate(-a.angle, center);
+        a.item.scale(smear, 1 / Math.sqrt(smear), center);
+        a.item.rotate(a.angle, center);
+      }
+
+      if (t >= 1) {
+        isAnimating = false;
+        animatingTiles = [];
+        renderPoster(currentSpecials, currentTiles, currentCs);
+      }
+    };
+
     function placeAndFill(inst, cellX, cellY, cellW, cellH) {
       inst.position = new paper.Point(cellX + cellW / 2, cellY + cellH / 2);
       const b = inst.bounds;
@@ -315,6 +339,70 @@
         }
       }
       return false;
+    }
+
+    async function triggerSwap() {
+      isAnimating = true;
+      try {
+        const cols = gridCols;
+        const rows = gridRows;
+        const cs = currentCs;
+
+        prevSpecials = currentSpecials;
+        prevTiles = currentTiles;
+
+        let specials, tiles, attempts = 0;
+        do {
+          initGrid(cols, rows);
+          specials = placeSpecials();
+          tiles = placeTiles();
+          attempts++;
+        } while (hasSamePositionConflict(specials, tiles, prevSpecials, prevTiles) && attempts < 20);
+
+        renderPoster(specials, tiles, cs);
+
+        const animItems = [];
+        for (const ns of specials) {
+          const os = prevSpecials.find(s => s.index === ns.index);
+          if (!os) continue;
+          const item = ns._item;
+          const oldPos = new paper.Point((os.col + os.w / 2) * cs, (os.row + os.h / 2) * cs);
+          const newPos = new paper.Point((ns.col + ns.w / 2) * cs, (ns.row + ns.h / 2) * cs);
+          if (oldPos.getDistance(newPos) < 1) continue;
+          item.position = oldPos;
+          animItems.push({
+            item,
+            oldPos: oldPos.clone(),
+            newPos: newPos.clone(),
+            baseMatrix: item.matrix.clone(),
+            angle: newPos.subtract(oldPos).angle
+          });
+        }
+
+        for (const nt of tiles) {
+          const ot = prevTiles.find(t => t.tileIndex === nt.tileIndex);
+          if (!ot) continue;
+          const item = nt._item;
+          const oldPos = new paper.Point((ot.col + ot.size / 2) * cs, (ot.row + ot.size / 2) * cs);
+          const newPos = new paper.Point((nt.col + nt.size / 2) * cs, (nt.row + nt.size / 2) * cs);
+          if (oldPos.getDistance(newPos) < 1) continue;
+          item.position = oldPos;
+          animItems.push({
+            item,
+            oldPos: oldPos.clone(),
+            newPos: newPos.clone(),
+            baseMatrix: item.matrix.clone(),
+            angle: newPos.subtract(oldPos).angle
+          });
+        }
+
+        currentSpecials = specials;
+        currentTiles = tiles;
+        animatingTiles = animItems;
+      } catch (e) {
+        showError(e.message);
+        isAnimating = false;
+      }
     }
 
     async function init() {
