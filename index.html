@@ -359,45 +359,43 @@
           const nc = e.col + dir.dc;
           if (nr < 0 || nr + e.h > gridRows || nc < 0 || nc + e.w > gridCols) continue;
 
-          let free = true;
-          for (let dr = 0; dr < e.h && free; dr++)
-            for (let dc = 0; dc < e.w && free; dc++) {
-              const occ = grid[nr + dr][nc + dc];
-              if (occ !== null && !(occ.type === e.type && occ.index === e.index))
-                free = false;
-            }
-
-          if (free) {
-            for (let dr = 0; dr < e.h; dr++)
-              for (let dc = 0; dc < e.w; dc++)
-                grid[e.row + dr][e.col + dc] = null;
-            for (let dr = 0; dr < e.h; dr++)
-              for (let dc = 0; dc < e.w; dc++) {
-                if (e.type === 'special')
-                  grid[nr + dr][nc + dc] = { type: 'special', index: e.index };
-                else
-                  grid[nr + dr][nc + dc] = { type: 'tile', index: e.index, size: e.w };
-              }
-            e.row = nr;
-            e.col = nc;
-            break;
-          }
-
-          if (e.w === 1 && e.h === 1 && grid[nr][nc] !== null) {
+          if (e.w === 1 && e.h === 1) {
             const occ = grid[nr][nc];
-            if (occ.type === 'tile' && occ.size === 1) {
+            if (occ !== null && occ.type === 'tile' && occ.size === 1) {
               const occIdx = entries.findIndex(x => x.type === 'tile' && x.index === occ.index);
-              if (occIdx >= 0) {
-                const other = entries[occIdx];
-                grid[e.row][e.col] = null;
-                grid[other.row][other.col] = null;
-                grid[nr][nc] = { type: 'tile', index: e.index, size: 1 };
-                grid[e.row][e.col] = { type: 'tile', index: other.index, size: 1 };
-                const tmpR = other.row, tmpC = other.col;
-                other.row = e.row; other.col = e.col;
-                e.row = nr; e.col = nc;
-                break;
+              if (occIdx < 0) continue;
+              const other = entries[occIdx];
+              grid[e.row][e.col] = null;
+              grid[other.row][other.col] = null;
+              grid[nr][nc] = { type: 'tile', index: e.index, size: 1 };
+              grid[e.row][e.col] = { type: 'tile', index: other.index, size: 1 };
+              const tmpR = other.row, tmpC = other.col;
+              other.row = e.row; other.col = e.col;
+              e.row = nr; e.col = nc;
+              break;
+            }
+          } else {
+            let free = true;
+            for (let dr = 0; dr < e.h && free; dr++)
+              for (let dc = 0; dc < e.w && free; dc++) {
+                const occ = grid[nr + dr][nc + dc];
+                if (occ !== null && !(occ.type === e.type && occ.index === e.index))
+                  free = false;
               }
+            if (free) {
+              for (let dr = 0; dr < e.h; dr++)
+                for (let dc = 0; dc < e.w; dc++)
+                  grid[e.row + dr][e.col + dc] = null;
+              for (let dr = 0; dr < e.h; dr++)
+                for (let dc = 0; dc < e.w; dc++) {
+                  if (e.type === 'special')
+                    grid[nr + dr][nc + dc] = { type: 'special', index: e.index };
+                  else
+                    grid[nr + dr][nc + dc] = { type: 'tile', index: e.index, size: e.w };
+                }
+              e.row = nr;
+              e.col = nc;
+              break;
             }
           }
         }
