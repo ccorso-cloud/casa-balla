@@ -299,6 +299,24 @@
       }, 5000);
     }
 
+    function positionsEqual(a, b) {
+      return a.row === b.row && a.col === b.col;
+    }
+
+    function hasSamePositionConflict(newSpecials, newTiles, oldSpecials, oldTiles) {
+      for (const ns of newSpecials) {
+        for (const os of oldSpecials) {
+          if (ns.index === os.index && positionsEqual(ns, os)) return true;
+        }
+      }
+      for (const nt of newTiles) {
+        for (const ot of oldTiles) {
+          if (nt.tileIndex === ot.tileIndex && positionsEqual(nt, ot)) return true;
+        }
+      }
+      return false;
+    }
+
     async function init() {
       if (generating) return;
       generating = true;
