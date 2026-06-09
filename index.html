@@ -273,18 +273,37 @@
       paper.view.draw();
 
       const canvas = paper.view.element;
-      const padX = canvas.width - 40;
-      const padY = canvas.height - 40;
+      const padX = canvas.width - 80;
+      const padY = canvas.height - 80;
       const scaleX = padX / totalW;
       const scaleY = padY / totalH;
-      const scale = Math.min(scaleX, scaleY);
-      paper.view.zoom = scale;
+      const scale = Math.min(scaleX, scaleY, 1);
+      paper.view.zoom = Math.max(scale, 0.1);
       paper.view.center = new paper.Point(totalW / 2, totalH / 2);
     }
 
+    function fitViewport() {
+      const totalW = gridCols * UNIT;
+      const totalH = gridRows * UNIT;
+      const canvas = paper.view.element;
+      const padX = canvas.width - 80;
+      const padY = canvas.height - 80;
+      const scaleX = padX / totalW;
+      const scaleY = padY / totalH;
+      const scale = Math.min(scaleX, scaleY, 1);
+      paper.view.zoom = Math.max(scale, 0.1);
+      paper.view.center = new paper.Point(totalW / 2, totalH / 2);
+      paper.view.draw();
+    }
+
+    let svgsLoaded = false;
+
     async function init() {
       try {
-        await loadAllSVGs();
+        if (!svgsLoaded) {
+          await loadAllSVGs();
+          svgsLoaded = true;
+        }
         const cols = parseInt(document.getElementById('colsInput').value);
         const rows = parseInt(document.getElementById('rowsInput').value);
         initGrid(cols, rows);
@@ -305,7 +324,7 @@
 
     window.addEventListener('resize', () => {
       resizeCanvas();
-      init();
+      if (gridCols > 0) fitViewport();
     });
 
     resizeCanvas();
