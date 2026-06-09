@@ -234,6 +234,16 @@
 
     paper.setup('myCanvas');
 
+    function placeAndFill(inst, cellX, cellY, cellW, cellH) {
+      inst.position = new paper.Point(cellX + cellW / 2, cellY + cellH / 2);
+      const b = inst.bounds;
+      if (b.width > 0 && b.height > 0) {
+        const s = Math.max(cellW / b.width, cellH / b.height);
+        inst.scale(s);
+        inst.position = new paper.Point(cellX + cellW / 2, cellY + cellH / 2);
+      }
+    }
+
     function renderPoster(placedSpecials, placedTiles) {
       paper.project.activeLayer.removeChildren();
       const totalW = gridCols * UNIT;
@@ -246,43 +256,38 @@
       });
 
       for (const s of placedSpecials) {
-        const inst = specialSymbols[s.index].symbol.place(new paper.Point(
-          s.col * UNIT,
-          s.row * UNIT
-        ));
-        inst.scale(UNIT / 168.38);
+        const inst = specialSymbols[s.index].symbol.place([0, 0]);
+        placeAndFill(inst, s.col * UNIT, s.row * UNIT, s.w * UNIT, s.h * UNIT);
       }
 
       for (const t of placedTiles) {
-        const inst = tileSymbols[t.tileIndex].place(new paper.Point(
-          t.col * UNIT,
-          t.row * UNIT
-        ));
-        inst.scale((UNIT * t.size) / 168.38);
+        const inst = tileSymbols[t.tileIndex].place([0, 0]);
+        placeAndFill(inst, t.col * UNIT, t.row * UNIT, t.size * UNIT, t.size * UNIT);
       }
 
       paper.view.draw();
 
       const canvas = paper.view.element;
-      const padX = canvas.width - 80;
-      const padY = canvas.height - 80;
-      const scaleX = padX / totalW;
-      const scaleY = padY / totalH;
-      const scale = Math.min(scaleX, scaleY, 1);
-      paper.view.zoom = Math.max(scale, 0.1);
+      const vw = canvas.width;
+      const vh = canvas.height;
+      if (vw === 0 || vh === 0) return;
+      const sx = (vw - 80) / totalW;
+      const sy = (vh - 80) / totalH;
+      paper.view.zoom = Math.max(Math.min(sx, sy), 0.1);
       paper.view.center = new paper.Point(totalW / 2, totalH / 2);
     }
 
     function fitViewport() {
+      if (gridCols === 0) return;
       const totalW = gridCols * UNIT;
       const totalH = gridRows * UNIT;
       const canvas = paper.view.element;
-      const padX = canvas.width - 80;
-      const padY = canvas.height - 80;
-      const scaleX = padX / totalW;
-      const scaleY = padY / totalH;
-      const scale = Math.min(scaleX, scaleY, 1);
-      paper.view.zoom = Math.max(scale, 0.1);
+      const vw = canvas.width;
+      const vh = canvas.height;
+      if (vw === 0 || vh === 0) return;
+      const sx = (vw - 80) / totalW;
+      const sy = (vh - 80) / totalH;
+      paper.view.zoom = Math.max(Math.min(sx, sy), 0.1);
       paper.view.center = new paper.Point(totalW / 2, totalH / 2);
       paper.view.draw();
     }
@@ -316,6 +321,7 @@
       const canvas = document.getElementById('myCanvas');
       canvas.width = container.clientWidth;
       canvas.height = container.clientHeight;
+      paper.view.viewSize = new paper.Size(canvas.width, canvas.height);
     }
 
     window.addEventListener('resize', () => {
