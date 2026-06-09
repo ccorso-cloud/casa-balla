@@ -93,14 +93,7 @@
 
     let tileSymbols = [];
     let specialSymbols = [];
-    let swapTimer = null;
-    let isAnimating = false;
-    let animatingTiles = [];
-    let prevSpecials = [];
-    let prevTiles = [];
-    let currentSpecials = [];
-    let currentTiles = [];
-    let currentCs = 0;
+
 
     function showError(msg) {
       const el = document.getElementById('errorMsg');
@@ -250,30 +243,6 @@
 
     paper.setup('myCanvas');
 
-    paper.view.onFrame = function(event) {
-      if (!isAnimating || animatingTiles.length === 0) return;
-      const duration = 1.5;
-      const t = Math.min(event.time / duration, 1);
-
-      for (const a of animatingTiles) {
-        a.item.matrix = a.baseMatrix.clone();
-        const pt = a.oldPos.clone().add(a.newPos.subtract(a.oldPos).multiply(t));
-        a.item.position = pt;
-
-        const smear = 1 + Math.sin(t * Math.PI) * 2.5;
-        const center = a.item.bounds.center;
-        a.item.rotate(-a.angle, center);
-        a.item.scale(smear, 1 / Math.sqrt(smear), center);
-        a.item.rotate(a.angle, center);
-      }
-
-      if (t >= 1) {
-        isAnimating = false;
-        animatingTiles = [];
-        renderPoster(currentSpecials, currentTiles, currentCs);
-      }
-    };
-
     function placeAndFill(inst, cellX, cellY, cellW, cellH) {
       inst.position = new paper.Point(cellX + cellW / 2, cellY + cellH / 2);
       const b = inst.bounds;
@@ -315,185 +284,6 @@
     let svgsLoaded = false;
     let generating = false;
 
-    function startSwapTimer() {
-      if (swapTimer) clearInterval(swapTimer);
-      swapTimer = setInterval(() => {
-        if (isAnimating || generating) return;
-        triggerSwap();
-      }, 5000);
-    }
-
-    function stepTiles() {
-      const entries = [];
-      const visited = new Set();
-
-      for (let r = 0; r < gridRows; r++) {
-        for (let c = 0; c < gridCols; c++) {
-          const key = r + ',' + c;
-          if (visited.has(key)) continue;
-          const cell = grid[r][c];
-          if (cell === null) continue;
-
-          if (cell.type === 'special') {
-            const sp = SPECIALS[cell.index];
-            entries.push({ type: 'special', index: cell.index, row: r, col: c, w: sp.w, h: sp.h });
-            for (let dr = 0; dr < sp.h; dr++)
-              for (let dc = 0; dc < sp.w; dc++)
-                visited.add((r + dr) + ',' + (c + dc));
-          } else {
-            const sz = cell.size;
-            entries.push({ type: 'tile', index: cell.index, row: r, col: c, w: sz, h: sz });
-            for (let dr = 0; dr < sz; dr++)
-              for (let dc = 0; dc < sz; dc++)
-                visited.add((r + dr) + ',' + (c + dc));
-          }
-        }
-      }
-
-      shuffleArray(entries);
-
-      const moved = new Set();
-
-      for (let ei = 0; ei < entries.length; ei++) {
-        if (moved.has(ei)) continue;
-        const e = entries[ei];
-        const dirs = shuffleArray([{ dr: -1, dc: 0 }, { dr: 1, dc: 0 }, { dr: 0, dc: -1 }, { dr: 0, dc: 1 }]);
-        for (const dir of dirs) {
-          const nr = e.row + dir.dr;
-          const nc = e.col + dir.dc;
-          if (nr < 0 || nr + e.h > gridRows || nc < 0 || nc + e.w > gridCols) continue;
-
-          if (e.w === 1 && e.h === 1) {
-            const occ = grid[nr][nc];
-            if (occ !== null) {
-              const occIdx = entries.findIndex(x => x.type === occ.type && x.index === occ.index);
-              if (occIdx < 0) continue;
-              const other = entries[occIdx];
-              if (other.w !== 1 || other.h !== 1) continue;
-              moved.add(occIdx);
-              const cellE = e.type === 'special' ? { type: 'special', index: e.index } : { type: 'tile', index: e.index, size: 1 };
-              const cellO = other.type === 'special' ? { type: 'special', index: other.index } : { type: 'tile', index: other.index, size: 1 };
-              grid[e.row][e.col] = null;
-              grid[other.row][other.col] = null;
-              grid[nr][nc] = cellE;
-              grid[e.row][e.col] = cellO;
-              const tmpR = other.row, tmpC = other.col;
-              other.row = e.row; other.col = e.col;
-              e.row = nr; e.col = nc;
-              break;
-            }
-          } else {
-            let free = true;
-            for (let dr = 0; dr < e.h && free; dr++)
-              for (let dc = 0; dc < e.w && free; dc++) {
-                const occ = grid[nr + dr][nc + dc];
-                if (occ !== null && !(occ.type === e.type && occ.index === e.index))
-                  free = false;
-              }
-            if (free) {
-              for (let dr = 0; dr < e.h; dr++)
-                for (let dc = 0; dc < e.w; dc++)
-                  grid[e.row + dr][e.col + dc] = null;
-              for (let dr = 0; dr < e.h; dr++)
-                for (let dc = 0; dc < e.w; dc++) {
-                  if (e.type === 'special')
-                    grid[nr + dr][nc + dc] = { type: 'special', index: e.index };
-                  else
-                    grid[nr + dr][nc + dc] = { type: 'tile', index: e.index, size: e.w };
-                }
-              e.row = nr;
-              e.col = nc;
-              break;
-            }
-          }
-        }
-      }
-
-      const resultSpecials = [];
-      const resultTiles = [];
-      const mark = new Set();
-
-      for (let r = 0; r < gridRows; r++) {
-        for (let c = 0; c < gridCols; c++) {
-          const key = r + ',' + c;
-          if (mark.has(key)) continue;
-          const cell = grid[r][c];
-          if (cell === null) continue;
-
-          if (cell.type === 'special') {
-            const sp = SPECIALS[cell.index];
-            resultSpecials.push({ row: r, col: c, w: sp.w, h: sp.h, special: true, index: cell.index });
-            for (let dr = 0; dr < sp.h; dr++)
-              for (let dc = 0; dc < sp.w; dc++)
-                mark.add((r + dr) + ',' + (c + dc));
-          } else {
-            resultTiles.push({ row: r, col: c, size: cell.size, tileIndex: cell.index });
-            for (let dr = 0; dr < cell.size; dr++)
-              for (let dc = 0; dc < cell.size; dc++)
-                mark.add((r + dr) + ',' + (c + dc));
-          }
-        }
-      }
-
-      return { specials: resultSpecials, tiles: resultTiles };
-    }
-
-    async function triggerSwap() {
-      isAnimating = true;
-      try {
-        const cs = currentCs;
-        prevSpecials = currentSpecials;
-        prevTiles = currentTiles;
-
-        const { specials, tiles } = stepTiles();
-        const gapFillers = placeTiles();
-        const allTiles = tiles.concat(gapFillers);
-        renderPoster(specials, allTiles, cs);
-
-        const animItems = [];
-        for (const ns of specials) {
-          const os = prevSpecials.find(s => s.index === ns.index);
-          if (!os) continue;
-          const item = ns._item;
-          const oldPos = new paper.Point((os.col + os.w / 2) * cs, (os.row + os.h / 2) * cs);
-          const newPos = new paper.Point((ns.col + ns.w / 2) * cs, (ns.row + ns.h / 2) * cs);
-          if (oldPos.getDistance(newPos) < 1) continue;
-          item.position = oldPos;
-          animItems.push({
-            item,
-            oldPos: oldPos.clone(),
-            newPos: newPos.clone(),
-            baseMatrix: item.matrix.clone(),
-            angle: newPos.subtract(oldPos).angle
-          });
-        }
-
-        for (const nt of tiles) {
-          const ot = prevTiles.find(t => t.tileIndex === nt.tileIndex);
-          if (!ot) continue;
-          const item = nt._item;
-          const oldPos = new paper.Point((ot.col + ot.size / 2) * cs, (ot.row + ot.size / 2) * cs);
-          const newPos = new paper.Point((nt.col + nt.size / 2) * cs, (nt.row + nt.size / 2) * cs);
-          if (oldPos.getDistance(newPos) < 1) continue;
-          item.position = oldPos;
-          animItems.push({
-            item,
-            oldPos: oldPos.clone(),
-            newPos: newPos.clone(),
-            baseMatrix: item.matrix.clone(),
-            angle: newPos.subtract(oldPos).angle
-          });
-        }
-
-        currentSpecials = specials;
-        currentTiles = allTiles;
-        animatingTiles = animItems;
-      } catch (e) {
-        showError(e.message);
-        isAnimating = false;
-      }
-    }
-
     async function init() {
       if (generating) return;
       generating = true;
@@ -510,10 +300,6 @@
         const specials = placeSpecials();
         const tiles = placeTiles();
         renderPoster(specials, tiles, cs);
-        currentSpecials = specials;
-        currentTiles = tiles;
-        currentCs = cs;
-        startSwapTimer();
       } catch (e) {
         showError(e.message);
       } finally {
@@ -531,19 +317,13 @@
 
     window.addEventListener('resize', () => {
       resizeCanvas();
-      if (gridCols > 0 && !isAnimating) init();
+      if (gridCols > 0) init();
     });
 
     resizeCanvas();
     init();
 
-    document.getElementById('generateBtn').addEventListener('click', () => {
-      if (swapTimer) clearInterval(swapTimer);
-      swapTimer = null;
-      isAnimating = false;
-      animatingTiles = [];
-      init();
-    });
+    document.getElementById('generateBtn').addEventListener('click', init);
 
     document.getElementById('exportBtn').addEventListener('click', () => {
       const canvas = document.getElementById('myCanvas');
