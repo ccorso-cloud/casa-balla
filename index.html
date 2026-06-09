@@ -274,11 +274,13 @@
       for (const s of placedSpecials) {
         const inst = specialSymbols[s.index].symbol.place([0, 0]);
         placeAndFill(inst, s.col * cs, s.row * cs, s.w * cs, s.h * cs);
+        s._item = inst;
       }
 
       for (const t of placedTiles) {
         const inst = tileSymbols[t.tileIndex].place([0, 0]);
         placeAndFill(inst, t.col * cs, t.row * cs, t.size * cs, t.size * cs);
+        t._item = inst;
       }
 
       paper.view.zoom = 1;
