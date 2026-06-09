@@ -93,8 +93,6 @@
 
     let tileSymbols = [];
     let specialSymbols = [];
-    let rawTiles = [];
-    let animatedArrows = [];
 
     function showError(msg) {
       const el = document.getElementById('errorMsg');
@@ -124,7 +122,6 @@
       const tiles = (await Promise.all(tilePromises)).filter(Boolean);
       const specials = (await Promise.all(specialPromises)).filter(Boolean);
       if (tiles.length === 0) throw new Error('Nessun tassello caricato. Verifica i file SVG.');
-      rawTiles = tiles;
       tileSymbols = tiles.map(t => new paper.Symbol(t));
       specialSymbols = specials.map((s, i) => ({
         symbol: new paper.Symbol(s),
@@ -257,7 +254,6 @@
 
     function renderPoster(placedSpecials, placedTiles, cs) {
       paper.project.activeLayer.removeChildren();
-      animatedArrows = [];
       const totalW = gridCols * cs;
       const totalH = gridRows * cs;
 
@@ -273,32 +269,14 @@
       }
 
       for (const t of placedTiles) {
-        const isRisorsa8 = rawTiles.length > 0 && rawTiles[t.tileIndex] === rawTiles[0];
-        let inst;
-        if (isRisorsa8) {
-          inst = rawTiles[0].clone();
-        } else {
-          inst = tileSymbols[t.tileIndex].place([0, 0]);
-        }
+        const inst = tileSymbols[t.tileIndex].place([0, 0]);
         placeAndFill(inst, t.col * cs, t.row * cs, t.size * cs, t.size * cs);
-        if (isRisorsa8) {
-          const arrow = inst.getItem({ name: 'freccia' });
-          if (arrow) {
-            animatedArrows.push({ arrow, baseX: arrow.position.x });
-          }
-        }
       }
 
       paper.view.zoom = 1;
       paper.view.center = new paper.Point(totalW / 2, totalH / 2);
       paper.view.draw();
     }
-
-    paper.view.onFrame = function(event) {
-      for (const a of animatedArrows) {
-        a.arrow.position.x = a.baseX + Math.sin(event.time * 3) * 3;
-      }
-    };
 
     let svgsLoaded = false;
     let generating = false;
