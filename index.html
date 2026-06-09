@@ -120,13 +120,13 @@
         loadSVG(s.file).catch(() => null)
       );
       const tiles = (await Promise.all(tilePromises)).filter(Boolean);
-      const specialResults = await Promise.all(specialPromises);
+      const specials = (await Promise.all(specialPromises)).filter(Boolean);
       if (tiles.length === 0) throw new Error('Nessun tassello caricato. Verifica i file SVG.');
       tileSymbols = tiles.map(t => new paper.Symbol(t));
-      specialSymbols = SPECIALS.map((s, i) => {
-        if (!specialResults[i]) return null;
-        return { symbol: new paper.Symbol(specialResults[i]), w: s.w, h: s.h };
-      });
+      specialSymbols = specials.map((s, i) => ({
+        symbol: new paper.Symbol(s),
+        w: SPECIALS[i].w,
+        h: SPECIALS[i].h
       }));
     }
 
@@ -162,7 +162,6 @@
       const order = [...indexed].sort((a, b) => (b.w * b.h) - (a.w * a.h));
 
       for (const special of order) {
-        if (specialSymbols[special.origIndex] === null) continue;
         if (special.h > gridRows || special.w > gridCols) {
           throw new Error('Griglia troppo piccola per gli speciali. Aumenta righe o colonne.');
         }
@@ -265,9 +264,7 @@
       });
 
       for (const s of placedSpecials) {
-        const sym = specialSymbols[s.index];
-        if (!sym) continue;
-        const inst = sym.symbol.place([0, 0]);
+        const inst = specialSymbols[s.index].symbol.place([0, 0]);
         placeAndFill(inst, s.col * cs, s.row * cs, s.w * cs, s.h * cs);
       }
 
