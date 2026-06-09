@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generatore Poster — Casa Balla</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.17/paper-full.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0f0f0; font-family: 'Helvetica Neue', Arial, sans-serif; overflow: hidden; height: 100vh; }
+  #toolbar {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: rgba(255,255,255,0.95); border-radius: 12px;
+    padding: 16px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    display: flex; gap: 16px; align-items: center; z-index: 10;
+    backdrop-filter: blur(8px);
+  }
+  #toolbar label { font-size: 14px; font-weight: 600; color: #333; }
+  #toolbar input[type="number"] {
+    width: 60px; padding: 6px 8px; border: 2px solid #ddd; border-radius: 6px;
+    font-size: 14px; text-align: center;
+  }
+  #toolbar input[type="number"]:focus { border-color: #009fe3; outline: none; }
+  #generateBtn {
+    background: #009fe3; color: #fff; border: none; border-radius: 6px;
+    padding: 8px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background 0.2s;
+  }
+  #generateBtn:hover { background: #007bb5; }
+  #exportBtn {
+    background: #733b8f; color: #fff; border: none; border-radius: 6px;
+    padding: 8px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background 0.2s;
+  }
+  #exportBtn:hover { background: #5a2e72; }
+  #errorMsg {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: #e74c3c; color: #fff; padding: 12px 24px; border-radius: 8px;
+    display: none; z-index: 10; font-size: 14px;
+  }
+  #canvasContainer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+  <div id="toolbar">
+    <label>Colonne</label>
+    <input type="number" id="colsInput" value="6" min="3" max="20">
+    <label>Righe</label>
+    <input type="number" id="rowsInput" value="8" min="3" max="20">
+    <button id="generateBtn">Genera</button>
+    <button id="exportBtn">Esporta PNG</button>
+  </div>
+  <div id="errorMsg"></div>
+  <div id="canvasContainer">
+    <canvas id="myCanvas" resize></canvas>
+  </div>
+  <script>
+    // JS will go here in subsequent tasks
+  </script>
+</body>
+</html>
