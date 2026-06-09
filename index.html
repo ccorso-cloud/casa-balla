@@ -55,7 +55,7 @@
   </div>
   <div id="errorMsg" role="alert"></div>
   <div id="canvasContainer">
-    <canvas id="myCanvas" resize></canvas>
+    <canvas id="myCanvas"></canvas>
   </div>
   <script>
     const TILES = [
@@ -243,18 +243,72 @@
 
     paper.setup('myCanvas');
 
+    function renderPoster(placedSpecials, placedTiles) {
+      paper.project.activeLayer.removeChildren();
+      const totalW = gridCols * UNIT;
+      const totalH = gridRows * UNIT;
+
+      const bg = new paper.Shape.Rectangle({
+        point: [0, 0],
+        size: [totalW, totalH],
+        fillColor: '#ffffff'
+      });
+
+      for (const s of placedSpecials) {
+        const inst = specialSymbols[s.index].symbol.place(new paper.Point(
+          s.col * UNIT,
+          s.row * UNIT
+        ));
+        inst.scale(UNIT / 168.38);
+      }
+
+      for (const t of placedTiles) {
+        const inst = tileSymbols[t.tileIndex].place(new paper.Point(
+          t.col * UNIT,
+          t.row * UNIT
+        ));
+        inst.scale((UNIT * t.size) / 168.38);
+      }
+
+      paper.view.draw();
+
+      const canvas = paper.view.element;
+      const padX = canvas.width - 40;
+      const padY = canvas.height - 40;
+      const scaleX = padX / totalW;
+      const scaleY = padY / totalH;
+      const scale = Math.min(scaleX, scaleY);
+      paper.view.zoom = scale;
+      paper.view.center = new paper.Point(totalW / 2, totalH / 2);
+    }
+
     async function init() {
       try {
         await loadAllSVGs();
-        initGrid(6, 8);
+        const cols = parseInt(document.getElementById('colsInput').value);
+        const rows = parseInt(document.getElementById('rowsInput').value);
+        initGrid(cols, rows);
         const specials = placeSpecials();
         const tiles = placeTiles();
-        console.log('Placed', specials.length, 'specials,', tiles.length, 'tile groups');
-        console.log('Grid:', grid.map(r => r.map(c => c ? c.type + (c.size || '') : '·').join(' ')).join('\n'));
+        renderPoster(specials, tiles);
       } catch (e) {
         showError(e.message);
       }
     }
+
+    function resizeCanvas() {
+      const container = document.getElementById('canvasContainer');
+      const canvas = document.getElementById('myCanvas');
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      init();
+    });
+
+    resizeCanvas();
     init();
   </script>
 </body>
