@@ -58,7 +58,67 @@
     <canvas id="myCanvas" resize></canvas>
   </div>
   <script>
-    // JS will go here in subsequent tasks
+    const TILES = [
+      'tasselli/Risorsa 8.svg', 'tasselli/Risorsa 9.svg', 'tasselli/Risorsa 10.svg',
+      'tasselli/Risorsa 11.svg', 'tasselli/Risorsa 12.svg', 'tasselli/Risorsa 13.svg',
+      'tasselli/Risorsa 14.svg', 'tasselli/Risorsa 15.svg', 'tasselli/Risorsa 16.svg',
+      'tasselli/Risorsa 17.svg', 'tasselli/Risorsa 18.svg', 'tasselli/Risorsa 19.svg',
+      'tasselli/Risorsa 20.svg', 'tasselli/Risorsa 21.svg', 'tasselli/Risorsa 22.svg',
+      'tasselli/Risorsa 23.svg', 'tasselli/Risorsa 24.svg', 'tasselli/Risorsa 25.svg',
+      'tasselli/Risorsa 26.svg', 'tasselli/Risorsa 27.svg', 'tasselli/Risorsa 28.svg',
+      'tasselli/Risorsa 29.svg'
+    ];
+
+    const SPECIALS = [
+      { file: 'speciali/titolo-2x3.svg',  w: 2, h: 3 },
+      { file: 'speciali/info-2x2.svg',    w: 2, h: 2 },
+      { file: 'speciali/contatti-2x1.svg', w: 2, h: 1 },
+      { file: 'speciali/maxxi-1x1.svg',   w: 1, h: 1 },
+      { file: 'speciali/sovrintendenza-1x1.svg', w: 1, h: 1 }
+    ];
+
+    const UNIT = 168.38;
+
+    let tileSymbols = [];
+    let specialSymbols = [];
+
+    async function loadSVG(url) {
+      const resp = await fetch(url);
+      const svgText = await resp.text();
+      return new Promise(resolve => {
+        const svg = document.createElement('svg');
+        svg.innerHTML = svgText;
+        svg.setAttribute('style', 'display:none');
+        document.body.appendChild(svg);
+        paper.project.importSVG(svg, {
+          onLoad: function(item) {
+            item.remove();
+            resolve(item);
+          }
+        });
+      });
+    }
+
+    async function loadAllSVGs() {
+      const tilePromises = TILES.map(url => loadSVG(url));
+      const specialPromises = SPECIALS.map(s => loadSVG(s.file));
+      const tiles = await Promise.all(tilePromises);
+      const specials = await Promise.all(specialPromises);
+      tileSymbols = tiles.map(t => new paper.Symbol(t));
+      specialSymbols = specials.map((s, i) => ({
+        symbol: new paper.Symbol(s),
+        w: SPECIALS[i].w,
+        h: SPECIALS[i].h
+      }));
+    }
+
+    paper.setup('myCanvas');
+
+    async function init() {
+      await loadAllSVGs();
+      console.log('Loaded', tileSymbols.length, 'tile symbols');
+    }
+    init();
   </script>
 </body>
 </html>
