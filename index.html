@@ -131,11 +131,64 @@
       }));
     }
 
+    let grid = [];
+    let gridCols = 0;
+    let gridRows = 0;
+
+    function initGrid(cols, rows) {
+      gridCols = cols;
+      gridRows = rows;
+      grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+    }
+
+    function canPlace(r, c, w, h) {
+      if (r + h > gridRows || c + w > gridCols) return false;
+      for (let dr = 0; dr < h; dr++)
+        for (let dc = 0; dc < w; dc++)
+          if (grid[r + dr][c + dc] !== null) return false;
+      return true;
+    }
+
+    function placeSpecial(r, c, idx) {
+      const special = SPECIALS[idx];
+      for (let dr = 0; dr < special.h; dr++)
+        for (let dc = 0; dc < special.w; dc++)
+          grid[r + dr][c + dc] = { type: 'special', index: idx };
+      return { row: r, col: c, w: special.w, h: special.h, special: true, index: idx };
+    }
+
+    function placeSpecials() {
+      const placed = [];
+      const indexed = SPECIALS.map((s, i) => ({ ...s, origIndex: i }));
+      const order = indexed.sort((a, b) => (b.w * b.h) - (a.w * a.h));
+      for (const special of order) {
+        let attempts = 0;
+        let success = false;
+        while (attempts < 100 && !success) {
+          const r = Math.floor(Math.random() * (gridRows - special.h + 1));
+          const c = Math.floor(Math.random() * (gridCols - special.w + 1));
+          if (canPlace(r, c, special.w, special.h)) {
+            placed.push(placeSpecial(r, c, special.origIndex));
+            success = true;
+          }
+          attempts++;
+        }
+        if (!success) {
+          throw new Error('Griglia troppo piccola per posizionare tutti gli speciali. Aumenta righe o colonne.');
+        }
+      }
+      return placed;
+    }
+
     paper.setup('myCanvas');
 
     async function init() {
       try {
         await loadAllSVGs();
+        initGrid(6, 8);
+        const specials = placeSpecials();
+        console.log('Placed', specials.length, 'specials');
+        console.log('Grid:', grid.map(r => r.map(c => c ? c.type : '·').join(' ')).join('\n'));
       } catch (e) {
         showError(e.message);
       }
