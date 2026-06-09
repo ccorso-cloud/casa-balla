@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+<!--
+  Poster Generator — Casa Balla
+  Serve via HTTP: npx serve .  (or python -m http.server 8000)
+-->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Generatore Poster — Casa Balla</title>
@@ -329,6 +333,18 @@
 
     resizeCanvas();
     init();
+
+    document.getElementById('generateBtn').addEventListener('click', () => {
+      init();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const canvas = document.getElementById('myCanvas');
+      const link = document.createElement('a');
+      link.download = 'poster-casa-balla.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
   </script>
 </body>
 </html>
