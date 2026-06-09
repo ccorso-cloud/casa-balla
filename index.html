@@ -46,14 +46,14 @@
 </head>
 <body>
   <div id="toolbar">
-    <label>Colonne</label>
+    <label for="colsInput">Colonne</label>
     <input type="number" id="colsInput" value="6" min="3" max="20">
-    <label>Righe</label>
+    <label for="rowsInput">Righe</label>
     <input type="number" id="rowsInput" value="8" min="3" max="20">
     <button id="generateBtn">Genera</button>
     <button id="exportBtn">Esporta PNG</button>
   </div>
-  <div id="errorMsg"></div>
+  <div id="errorMsg" role="alert"></div>
   <div id="canvasContainer">
     <canvas id="myCanvas" resize></canvas>
   </div>
