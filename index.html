@@ -323,42 +323,120 @@
       }, 5000);
     }
 
-    function positionsEqual(a, b) {
-      return a.row === b.row && a.col === b.col;
-    }
+    function stepTiles() {
+      const entries = [];
+      const visited = new Set();
 
-    function hasSamePositionConflict(newSpecials, newTiles, oldSpecials, oldTiles) {
-      for (const ns of newSpecials) {
-        for (const os of oldSpecials) {
-          if (ns.index === os.index && positionsEqual(ns, os)) return true;
+      for (let r = 0; r < gridRows; r++) {
+        for (let c = 0; c < gridCols; c++) {
+          const key = r + ',' + c;
+          if (visited.has(key)) continue;
+          const cell = grid[r][c];
+          if (cell === null) continue;
+
+          if (cell.type === 'special') {
+            const sp = SPECIALS[cell.index];
+            entries.push({ type: 'special', index: cell.index, row: r, col: c, w: sp.w, h: sp.h });
+            for (let dr = 0; dr < sp.h; dr++)
+              for (let dc = 0; dc < sp.w; dc++)
+                visited.add((r + dr) + ',' + (c + dc));
+          } else {
+            const sz = cell.size;
+            entries.push({ type: 'tile', index: cell.index, row: r, col: c, w: sz, h: sz });
+            for (let dr = 0; dr < sz; dr++)
+              for (let dc = 0; dc < sz; dc++)
+                visited.add((r + dr) + ',' + (c + dc));
+          }
         }
       }
-      for (const nt of newTiles) {
-        for (const ot of oldTiles) {
-          if (nt.tileIndex === ot.tileIndex && positionsEqual(nt, ot)) return true;
+
+      shuffleArray(entries);
+
+      for (const e of entries) {
+        const dirs = shuffleArray([{ dr: -1, dc: 0 }, { dr: 1, dc: 0 }, { dr: 0, dc: -1 }, { dr: 0, dc: 1 }]);
+        for (const dir of dirs) {
+          const nr = e.row + dir.dr;
+          const nc = e.col + dir.dc;
+          if (nr < 0 || nr + e.h > gridRows || nc < 0 || nc + e.w > gridCols) continue;
+
+          let free = true;
+          for (let dr = 0; dr < e.h && free; dr++)
+            for (let dc = 0; dc < e.w && free; dc++)
+              if (grid[nr + dr][nc + dc] !== null) free = false;
+
+          if (free) {
+            for (let dr = 0; dr < e.h; dr++)
+              for (let dc = 0; dc < e.w; dc++)
+                grid[e.row + dr][e.col + dc] = null;
+            for (let dr = 0; dr < e.h; dr++)
+              for (let dc = 0; dc < e.w; dc++) {
+                if (e.type === 'special')
+                  grid[nr + dr][nc + dc] = { type: 'special', index: e.index };
+                else
+                  grid[nr + dr][nc + dc] = { type: 'tile', index: e.index, size: e.w };
+              }
+            e.row = nr;
+            e.col = nc;
+            break;
+          }
+
+          if (e.w === 1 && e.h === 1 && grid[nr][nc] !== null) {
+            const occ = grid[nr][nc];
+            if (occ.type === 'tile' && occ.size === 1) {
+              const occIdx = entries.findIndex(x => x.type === 'tile' && x.index === occ.index);
+              if (occIdx >= 0) {
+                const other = entries[occIdx];
+                grid[e.row][e.col] = null;
+                grid[other.row][other.col] = null;
+                grid[nr][nc] = { type: 'tile', index: e.index, size: 1 };
+                grid[e.row][e.col] = { type: 'tile', index: other.index, size: 1 };
+                const tmpR = other.row, tmpC = other.col;
+                other.row = e.row; other.col = e.col;
+                e.row = nr; e.col = nc;
+                break;
+              }
+            }
+          }
         }
       }
-      return false;
+
+      const resultSpecials = [];
+      const resultTiles = [];
+      const mark = new Set();
+
+      for (let r = 0; r < gridRows; r++) {
+        for (let c = 0; c < gridCols; c++) {
+          const key = r + ',' + c;
+          if (mark.has(key)) continue;
+          const cell = grid[r][c];
+          if (cell === null) continue;
+
+          if (cell.type === 'special') {
+            const sp = SPECIALS[cell.index];
+            resultSpecials.push({ row: r, col: c, w: sp.w, h: sp.h, special: true, index: cell.index });
+            for (let dr = 0; dr < sp.h; dr++)
+              for (let dc = 0; dc < sp.w; dc++)
+                mark.add((r + dr) + ',' + (c + dc));
+          } else {
+            resultTiles.push({ row: r, col: c, size: cell.size, tileIndex: cell.index });
+            for (let dr = 0; dr < cell.size; dr++)
+              for (let dc = 0; dc < cell.size; dc++)
+                mark.add((r + dr) + ',' + (c + dc));
+          }
+        }
+      }
+
+      return { specials: resultSpecials, tiles: resultTiles };
     }
 
     async function triggerSwap() {
       isAnimating = true;
       try {
-        const cols = gridCols;
-        const rows = gridRows;
         const cs = currentCs;
-
         prevSpecials = currentSpecials;
         prevTiles = currentTiles;
 
-        let specials, tiles, attempts = 0;
-        do {
-          initGrid(cols, rows);
-          specials = placeSpecials();
-          tiles = placeTiles();
-          attempts++;
-        } while (hasSamePositionConflict(specials, tiles, prevSpecials, prevTiles) && attempts < 20);
-
+        const { specials, tiles } = stepTiles();
         renderPoster(specials, tiles, cs);
 
         const animItems = [];
