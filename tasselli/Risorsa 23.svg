@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="59.36mm" height="59.36mm" viewBox="0 0 168.26 168.28">
+  <g isolation="isolate">
+    <g id="Livello_2" data-name="Livello 2">
+      <g id="Livello_1-2" data-name="Livello 1">
+        <g>
+          <rect x="0" y="0" width="168.26" height="168.28" fill="#fff"/>
+          <g>
+            <polygon points="0 82.52 0 0 83.85 0 0 82.52" fill="#dedc00"/>
+            <polygon points="168.26 82.98 84.13 167.43 0 82.52 168.26 82.98" fill="#733b8f"/>
+            <polygon points="84.15 .07 168.26 .07 168.26 82.98 84.15 .07" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="59.49mm" height="59.36mm" viewBox="0 0 168.62 168.28">
+  <g isolation="isolate">
+    <g id="Livello_2" data-name="Livello 2">
+      <g id="Livello_1-2" data-name="Livello 1">
+        <g>
+          <rect y="0" width="168.62" height="168.28" fill="#fff"/>
+          <rect x=".09" y="84.44" width="84.14" height="83.54" transform="translate(-84.05 168.37) rotate(-90)" fill="#733b8f"/>
+          <path d="M83.63,84.44h84.14v83.54h-.6c-46.11,0-83.54-37.43-83.54-83.54h0Z" transform="translate(-.51 251.9) rotate(-90)" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x="84.22" y="-.26" width="84.14" height="84.66" transform="translate(168.36 -84.22) rotate(90)" fill="#733b8f"/>
+          <path d="M.09.3h84.14v83.54h-.6C37.52,83.84.09,46.41.09.3H.09Z" transform="translate(84.23 -.09) rotate(90)" fill="#dedc00"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

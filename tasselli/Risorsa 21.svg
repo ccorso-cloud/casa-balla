@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="59.35mm" height="59.4mm" viewBox="0 0 168.22 168.38">
+  <g isolation="isolate">
+    <g id="Livello_2" data-name="Livello 2">
+      <g id="Livello_1-2" data-name="Livello 1">
+        <g>
+          <rect x="84.17" width="42.03" height="42.09" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <ellipse cx="105.18" cy="21.05" rx="21.01" ry="20.74" fill="#dedc00"/>
+          <rect x="42.14" y="42.09" width="42.03" height="42.09" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x=".12" width="42.03" height="42.09" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x="126.2" y="42.09" width="42.03" height="42.09" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x="42.14" y="126.28" width="42.03" height="42.09" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x=".12" y="84.19" width="42.03" height="42.09" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x="84.17" y="84.19" width="42.03" height="42.09" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x="126.2" y="126.28" width="42.03" height="42.09" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <ellipse cx="21.13" cy="21.05" rx="21.01" ry="20.74" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <ellipse cx="147.21" cy="63.14" rx="21.01" ry="20.74" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <ellipse cx="63.16" cy="63.14" rx="21.01" ry="20.74" fill="#733b8f"/>
+          <ellipse cx="105.07" cy="105.24" rx="21.01" ry="20.74" fill="#dedc00"/>
+          <ellipse cx="21.01" cy="105.24" rx="21.01" ry="20.74" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <ellipse cx="147.21" cy="147.33" rx="21.01" ry="20.74" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <ellipse cx="63.16" cy="147.33" rx="21.01" ry="20.74" fill="#733b8f"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

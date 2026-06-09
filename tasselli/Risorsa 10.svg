@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="59.4mm" height="59.5mm" viewBox="0 0 168.38 168.66">
+  <g isolation="isolate">
+    <g id="Livello_2" data-name="Livello 2">
+      <g id="Livello_1-2" data-name="Livello 1">
+        <g>
+          <rect x="42.09" y="42.17" width="42.09" height="42.17" fill="#733b8f"/>
+          <rect width="42.09" height="42.17" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x="84.19" width="42.09" height="42.17" fill="#dedc00"/>
+          <rect x="126.28" y="42.17" width="42.09" height="42.17" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x="42.09" y="126.5" width="42.09" height="42.17" fill="#733b8f"/>
+          <rect y="84.33" width="42.09" height="42.17" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+          <rect x="84.19" y="84.33" width="42.09" height="42.17" fill="#dedc00"/>
+          <rect x="126.28" y="126.5" width="42.09" height="42.17" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

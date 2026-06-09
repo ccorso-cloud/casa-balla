@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="59.4mm" height="59.4mm" viewBox="0 0 168.38 168.38">
+  <g isolation="isolate">
+    <g id="Livello_2" data-name="Livello 2">
+      <g id="Livello_1-2" data-name="Livello 1">
+        <g>
+          <rect x="0" y="0" width="83.91" height="168.38" fill="#dedc00"/>
+          <rect x="83.91" y="0" width="84.47" height="168.38" fill="#733b8f"/>
+          <ellipse cx="83.91" cy="85.92" rx="52.75" ry="52.65" fill="#009fe3" mix-blend-mode="multiply" opacity=".49"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
