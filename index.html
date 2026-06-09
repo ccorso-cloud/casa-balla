@@ -301,8 +301,11 @@
     }
 
     let svgsLoaded = false;
+    let generating = false;
 
     async function init() {
+      if (generating) return;
+      generating = true;
       try {
         if (!svgsLoaded) {
           await loadAllSVGs();
@@ -316,6 +319,8 @@
         renderPoster(specials, tiles);
       } catch (e) {
         showError(e.message);
+      } finally {
+        generating = false;
       }
     }
 
