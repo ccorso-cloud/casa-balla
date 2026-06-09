@@ -291,6 +291,14 @@
     let svgsLoaded = false;
     let generating = false;
 
+    function startSwapTimer() {
+      if (swapTimer) clearInterval(swapTimer);
+      swapTimer = setInterval(() => {
+        if (isAnimating || generating) return;
+        triggerSwap();
+      }, 5000);
+    }
+
     async function init() {
       if (generating) return;
       generating = true;
@@ -307,6 +315,10 @@
         const specials = placeSpecials();
         const tiles = placeTiles();
         renderPoster(specials, tiles, cs);
+        currentSpecials = specials;
+        currentTiles = tiles;
+        currentCs = cs;
+        startSwapTimer();
       } catch (e) {
         showError(e.message);
       } finally {
