@@ -200,6 +200,47 @@
       return placed;
     }
 
+    let tilePool = [];
+
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function refillPool() {
+      tilePool = shuffleArray([...Array(tileSymbols.length).keys()]);
+    }
+
+    function nextTileIndex() {
+      if (tilePool.length === 0) refillPool();
+      return tilePool.pop();
+    }
+
+    function placeTiles() {
+      refillPool();
+      const placed = [];
+      for (let r = 0; r < gridRows; r++) {
+        for (let c = 0; c < gridCols; c++) {
+          if (grid[r][c] !== null) continue;
+          const sizes = shuffleArray([3, 2, 1]);
+          for (const size of sizes) {
+            if (canPlace(r, c, size, size)) {
+              const idx = nextTileIndex();
+              for (let dr = 0; dr < size; dr++)
+                for (let dc = 0; dc < size; dc++)
+                  grid[r + dr][c + dc] = { type: 'tile', index: idx, size: size };
+              placed.push({ row: r, col: c, size, tileIndex: idx });
+              break;
+            }
+          }
+        }
+      }
+      return placed;
+    }
+
     paper.setup('myCanvas');
 
     async function init() {
@@ -207,8 +248,9 @@
         await loadAllSVGs();
         initGrid(6, 8);
         const specials = placeSpecials();
-        console.log('Placed', specials.length, 'specials');
-        console.log('Grid:', grid.map(r => r.map(c => c ? c.type : '·').join(' ')).join('\n'));
+        const tiles = placeTiles();
+        console.log('Placed', specials.length, 'specials,', tiles.length, 'tile groups');
+        console.log('Grid:', grid.map(r => r.map(c => c ? c.type + (c.size || '') : '·').join(' ')).join('\n'));
       } catch (e) {
         showError(e.message);
       }
